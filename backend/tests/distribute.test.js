@@ -44,14 +44,17 @@ await jest.unstable_mockModule("../src/stellar.js", () => ({
   addressToScVal: jest.fn((a) => a),
   u32ToScVal: jest.fn((n) => n),
   vecToScVal: jest.fn((v) => v),
+  getRecommendedFee: jest.fn(async () => "12345"),
   server: {},
   networkPassphrase: "Test SDF Network ; September 2015",
 }));
 
 const recordTransaction = jest.fn(() => "tx-456");
+const recordTransactionFee = jest.fn();
 
 await jest.unstable_mockModule("../src/database/index.js", () => ({
   recordTransaction,
+  recordTransactionFee,
   addAuditLog: jest.fn(),
   initializeDatabase: jest.fn(),
   getMigrationVersion: jest.fn(() => 1),
@@ -99,6 +102,16 @@ describe("POST /api/v1/distribute", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ xdr: "distribute-xdr", transactionId: "tx-456" });
+  });
+
+  test("records the transaction fee after a successful distribution", async () => {
+    retryBuildTx.mockResolvedValue("distribute-xdr");
+    recordTransaction.mockReturnValue("tx-456");
+
+    const res = await request(app).post("/api/v1/distribute").send(validBody);
+
+    expect(res.status).toBe(200);
+    expect(recordTransactionFee).toHaveBeenCalledWith("tx-456", CONTRACT, "12345");
   });
 
   test("broadcasts distribution_pending, not distribution_completed, once the XDR is built (#1177)", async () => {

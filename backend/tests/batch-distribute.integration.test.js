@@ -50,6 +50,7 @@ await jest.unstable_mockModule("../src/stellar.js", () => ({
   i128ToScVal: jest.fn((v) => v),
   u32ToScVal: jest.fn((n) => n),
   vecToScVal: jest.fn((v) => v),
+  getRecommendedFee: jest.fn(async () => "12345"),
   // Complete server mock with all necessary methods
   server: {
     simulateTransaction: jest.fn().mockResolvedValue({ result: "simulation-result" }),
@@ -75,6 +76,7 @@ const addAuditLog = jest.fn();
 await jest.unstable_mockModule("../src/database/index.js", () => ({
   recordTransaction,
   addAuditLog,
+  recordTransactionFee: jest.fn(),
   initializeDatabase: jest.fn(),
   getMigrationVersion: jest.fn(() => 1),
   // Mock transaction-finality functions

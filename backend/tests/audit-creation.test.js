@@ -48,6 +48,7 @@ await jest.unstable_mockModule("../src/stellar.js", () => ({
   u32ToScVal: jest.fn((n) => n),
   vecToScVal: jest.fn((v) => v),
   bytes32ToScVal: jest.fn((v) => v),
+  getRecommendedFee: jest.fn(async () => "12345"),
   BatchTransactionBuilder: jest.fn(),
   // Complete server mock with all necessary methods
   server: {
@@ -70,6 +71,7 @@ const addAuditLog = jest.fn();
 
 await jest.unstable_mockModule("../src/database/index.js", () => ({
   recordTransaction,
+  recordTransactionFee: jest.fn(),
   recordSecondarySale,
   getSecondarySales: jest.fn(() => []),
   recordSecondaryRoyaltyDistribution: jest.fn(),

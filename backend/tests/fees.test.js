@@ -115,42 +115,12 @@ describe("GET /api/v1/fees/transaction/:transactionId", () => {
 describe("POST /api/v1/fees/record", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test("records a fee and returns the saved record", async () => {
-    mockRecordTransactionFee.mockReturnValue(feeRecord(7));
-
+  test("route is not publicly exposed", async () => {
     const res = await request(app)
       .post("/api/v1/fees/record")
       .send({ transactionId: 7, contractId: CONTRACT, feeStroops: 34567 });
 
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(mockRecordTransactionFee).toHaveBeenCalledWith(7, CONTRACT, 34567);
-  });
-
-  test("accepts feeStroops as a numeric string", async () => {
-    mockRecordTransactionFee.mockReturnValue(feeRecord(8));
-
-    const res = await request(app)
-      .post("/api/v1/fees/record")
-      .send({ transactionId: 8, contractId: CONTRACT, feeStroops: "12345" });
-
-    expect(res.status).toBe(200);
-  });
-
-  test("400 when transactionId is missing", async () => {
-    const res = await request(app)
-      .post("/api/v1/fees/record")
-      .send({ contractId: CONTRACT, feeStroops: 100 });
-
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(404);
     expect(mockRecordTransactionFee).not.toHaveBeenCalled();
-  });
-
-  test("400 when contractId is invalid", async () => {
-    const res = await request(app)
-      .post("/api/v1/fees/record")
-      .send({ transactionId: 1, contractId: "bad", feeStroops: 100 });
-
-    expect(res.status).toBe(400);
   });
 });
