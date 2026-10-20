@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { addressToScVal } from "../stellar.js";
+import { addressToScVal, getRecommendedFee } from "../stellar.js";
 import { validate, distributeSchema } from "../validation.js";
 import { buildAndRecordTransaction } from "./_shared.js";
+import { recordTransactionFee } from "../database/index.js";
 import { deduplicationMiddleware, idempotencyMiddleware } from "../idempotency.js";
 import {
   recordDistributeCall,
@@ -69,6 +70,9 @@ distributeRouter.post(
       recordTransactionSuccess();
       recordDistributionLatency("build", Date.now() - buildStart);
       recordDistributionOutcomeMetric("built");
+
+      const feeStroops = await getRecommendedFee();
+      recordTransactionFee(transactionId, contractId, feeStroops);
       // Invalidate cached history and contract state so the new distribution
       // appears immediately on subsequent reads. Propagates via Redis
       // pub/sub to every other backend instance too (#926).

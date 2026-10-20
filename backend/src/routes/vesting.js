@@ -260,9 +260,12 @@ router.delete("/vesting/:scheduleId", attachRole, requireRole("admin"), (req, re
     const { reason } = req.body;
     const cancelledBy = req.user?.walletAddress || "admin";
 
-    cancelVestingSchedule(parseInt(scheduleId), cancelledBy, reason || "Cancelled by admin");
-
     const schedule = getVestingSchedule(parseInt(scheduleId));
+    if (!schedule) {
+      return sendError(res, 404, "not_found", "Vesting schedule not found");
+    }
+
+    cancelVestingSchedule(parseInt(scheduleId), cancelledBy, reason || "Cancelled by admin");
 
     // Add audit log entry
     addAuditEntry({
